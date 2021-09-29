@@ -27,8 +27,13 @@
 head(NI_extra)
 # change -9 to NA
 # First split HH and HL
+
+
+
 NI_HH<-subset(NI_extra, V1=="HH", )
+
 NI_HL<-subset(NI_extra, V1=="HL", )
+
 
 # Sort out the Col headings
 names(NI_HH)<-c("RecordType", "Quarter", "Country" , "Ship" , "Gear" , 
@@ -50,6 +55,7 @@ NI_HH$DateofCalculation<-"NA"
 summary(NI_HH)
 
 # Haul Durations recorded as decimal hour - change to mins (*60)
+head(NI_HH$HaulDur)
 NI_HH$HaulDur<-NI_HH$HaulDur*60
 
 # Now look at HL file
@@ -75,7 +81,7 @@ NI_HL$ValidAphiaID<-NI_HL$SpecCode
 
 
 summary(NI_HH$TimeShot)
-
+head(NI_HH$TimeShot)
 
 table(NI_HH$Ship, NI_HH$Year)
 
@@ -91,22 +97,31 @@ NI_HL$Ship_old <- NI_HL$Ship
 
 unique(NI_HH$TimeShot)
 
-
+# NI_HH$NewUniqueID3<-paste(NI_HH$Survey,NI_HH$Year, NI_HH$Quarter,NI_HH$Ship, 
+#                         NI_HH$HaulNo, NI_HH$Gear, NI_HH$StNo, NI_HH$Country,
+#                         sep="/")
+# 
+# NI_HL$NewUniqueID3<-paste(NI_HL$Survey,NI_HL$Year, NI_HL$Quarter,NI_HL$Ship, 
+#                           NI_HL$HaulNo, NI_HL$Gear, NI_HL$StNo, NI_HL$Country,
+#                           sep="/")
 
 # these data will be added to the product
 
-setdiff(names(HH), names(NI_HH)) ## new fields in Datras not in NI
-setdiff(names(NI_HH),names(HH)) ## nothing in NI that's not in Datras data
+# setdiff(NI_HH$NewUniqueID3, NI_HL$NewUniqueID3) ## headers with no HL data ## should be just 1 - "NIGFS/2001/4/LF/36/ROT/94/NI"
+# setdiff(NI_HL$NewUniqueID3,NI_HH$NewUniqueID3) ## nothing in NI that's not in Datras data
+
 
 
 HH1<-rbind(HH, NI_HH,  fill=TRUE)
 
-unique(HH1$Ship)
+
 
 ### Co is the corystes vessel code should be 
 HH1$Ship[HH1$Ship == "CO"] <- "74RY" 
 HH1$Ship[HH1$Ship == "7.4e+10"] <- "74E9"
 HH1$Ship[HH1$Ship == "LF"] <- "74LG"
+
+unique(HH1$Ship)
 
 
 HH1$UniqueID<-paste(HH1$Survey,HH1$Year,HH1$Quarter,HH1$Ship, 
@@ -146,7 +161,7 @@ NS_DEN<-rbind(NS_DEN_sp_1986,NS_DEN_sp_1985,
               NS_DEN_sp_1984,NS_DEN_sp_1983, fill=TRUE)
 
 NS_DEN_add_HH<-subset(NS_DEN, V1=="HH",
-)
+                      )
 NS_DEN_add_HL<-subset(NS_DEN, V1=="HL", 
 )
 
@@ -371,7 +386,6 @@ check
 # check that uploads have translated onto DATRAS
 sco<-subset(HH1, HH1$Country=="GB-SCT"&HH1$Year==1991&HH1$Survey=="NS-IBTS",)
 plot(sco$Depth, sco$DoorSpread, pch=21, col="grey")
-# no change in DATRAS
 
 #### These look okay now. RK 2021
 
@@ -395,7 +409,7 @@ plot(sco$Depth, sco$DoorSpread, pch=21, col="grey")
 # The following stations have outlying net opening values, 
 # can you verify that these outliers are true values (figure 1.1.1.13/14).
 # response was to use all but one - changed below
-HH1$Netopening[HH1$UniqueID=="NS-IBTS/1998/3/CIR/66/GOV"]#<-NA
+HH1$Netopening[HH1$UniqueID=="NS-IBTS/1998/3/CIR/66/GOV"] #<-NA
 HH1$Netopening[HH1$UniqueID=="NS-IBTS/1998/3/74CZ/66/GOV"]  <- NA
 
 
@@ -497,8 +511,8 @@ HH1<-subset(HH1, !HH1$UniqueID%in%list, )
 plot(HH1$Depth[HH1$Country=="SE"],HH1$WingSpread[HH1$Country=="SE"], pch=21, col="grey")
 # outlier not removed
 # 2021 - plot looks okay, outlier may have been removed on Datras?
-HH1$WingSpread[HH1$UniqueIDP=='NS-IBTS/2014/1/DANS/30/GOV']<-NA
-HH1$WingSpread[HH1$UniqueIDP=='NS-IBTS/2014/1/DANS/39/GOV']<-NA
+HH1$WingSpread[HH1$UniqueIDP=='NS-IBTS/2014/1/DANS/30/GOV']#<-NA
+HH1$WingSpread[HH1$UniqueIDP=='NS-IBTS/2014/1/DANS/39/GOV']#<-NA
 
 #####################
 # France NS-IBTS Q1 #
@@ -508,13 +522,12 @@ HH1$WingSpread[HH1$UniqueIDP=='NS-IBTS/2014/1/DANS/39/GOV']<-NA
 # YV: Values are too hight, delete and estimate based on model.
 # Wingspread normally 15m 
 
-#list<-c("NS-IBTS/1993/3/THA/53/GOV", "NS-IBTS/1995/1/THA/29/GOV")
+# list<-c("NS-IBTS/1993/3/THA/53/GOV", "NS-IBTS/1995/1/THA/29/GOV")
 
 hist(HH1$WingSpread[HH1$Ship_old == "THA"] )
 which(HH1$WingSpread[HH1$Ship_old == "THA"] > 30)
-## seeems like only one of these is still present - 2021
+## seems like only one of these is still present - 2021
 
-HH1[HH1$UniqueIDP%in%list]<-NA
 # 1995 record changed to 16
 # remove 1993 record only
 HH1$WingSpread[HH1$UniqueIDP=="NS-IBTS/1995/1/THA/29/GOV"]<-16
@@ -682,9 +695,11 @@ HH1$Depth[HH1$UniqueIDP=="SWC-IBTS/2009/4/SCO3/15/GOV"]#<-NA ### data changed on
 # At the station with the unique ID 2010/1/COR/44/ROT the haul duration
 # is recorded as 891 mins. Is this correct? 
 # M.L: haul duration corrected to 61min.
-check<-HH1[HH1$UniqueIDP=="NIGFS/2010/1/COR/44/ROT",]
-check
-# changed at source no action needed
+# check<-HH1[HH1$UniqueIDP=="NIGFS/2010/1/COR/44/ROT",]
+# check
+
+hist(HH1$HaulDur[HH1$Survey == "NIGFS"]) ### this seems to have been corrected at source
+
 
 # In figure 1.2.4.1 there are outliers in the following door spread values:
 # •	Unique ID: 2008/1/COR/15/ROT, Depth 48 m Door spread 26.2 m
@@ -692,7 +707,10 @@ check
 # Can you check these please?
 # M.L: Unique ID: 2008/1/COR/15/ROT, Door spread corrected to 34.2 m 
 # and Unique ID: 2009/1/COR/37/ROT, Door spread corrected to 38.3 m
-check<-HH1[HH1$UniqueIDP=="NIGFS/2009/1/COR/37/ROT",]
+HH1[HH1$UniqueIDP=="NIGFS/2009/1/CO/37/ROT",] ### #corrected at source -rk 2021
+HH1[HH1$UniqueIDP=="NIGFS/2008/1/CO/15/ROT",]### #corrected at source -rk 2021
+
+
 #######################################################################
 # 1.2.5 The Fourth Quarter Northern Irish Groundfish Survey (CSNIrOT4)#
 #######################################################################

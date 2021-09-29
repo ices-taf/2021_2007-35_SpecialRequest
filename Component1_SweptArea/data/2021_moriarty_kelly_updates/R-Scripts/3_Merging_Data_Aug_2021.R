@@ -11,13 +11,15 @@
 # data checking and processing
 # AUTHOR: Meadhbh Moriarty, 2016
 # REVIEWED BY: Nicola Walker (Cefas) Jonas Hentati Sundberg (SLU)
-# Edits by: Ruth Kelly (AFBI), June 2021 - R version 4.0.4 (2021-02-15) -- "Lost Library Book"
-####################
+# Edits by: Ruth Kelly (AFBI), June 2021 - R version 4.1.0 (2021-02-18) 
+###################
 # Check str of data#
 ####################
 # using data tables is better than data frames
 # better able to deal with larger data files.
 # convert all HH data frames to data tables
+
+library("data.table")
 
 # cut each dataset to the start date used by Moriarty et al.2017 - RK 2021
 HH_EVHOE<-as.data.table(HH_EVHOE)
@@ -49,8 +51,6 @@ table(HH_ROCK$Year)
 HH_SWC<-as.data.table(HH_SWC)
 table(HH_SWC$Year)
 
-HH_NIGFS<-as.data.table(HH_NIGFS)
-
 HH_BTS<-as.data.table(HH_BTS)
 
 HH_BTS <- HH_BTS[HH_BTS$Year> 1986,]
@@ -65,7 +65,7 @@ length(x2)
 HH_BTS <- HH_BTS[-x2,]
 
 ## Remove DE prior to 2002 - this wasn't on Datras yet when 
-# Moriarty did there work. It does appear to be the same ship, 
+# Moriarty did their work. It does appear to be the same ship, 
 # but the gear type and other params would need to be error checked 
 # before inclusion
 
@@ -74,7 +74,7 @@ table(HH_PT$Year) ## 2002-2018 present on Datras - Moriarty had 2001, but that's
 
 
 ## added Spain 2021
-## There are know to have been big changes in the Spannish data on DATRAS 
+## There are know to have been big changes in the Spanish data on DATRAS 
 ## User caution advised
 
 HH_SP_PORC <- as.data.table(HH_SP_PORC)
@@ -86,22 +86,19 @@ table(HH_SP_ARSA$Year, HH_SP_ARSA$Ship) ### remove 1996 to give continous series
 HH_SP_ARSA <- HH_SP_ARSA[HH_SP_ARSA$Year >1999,]
 
 
-
-
 # merge DATRAS HH data files
 
-
 HH<-rbind(HH_EVHOE, HH_FRCGFS, HH_IGFS, HH_NSIBTS, 
-          HH_ROCK, HH_SWC, HH_NIGFS, HH_PT, HH_BTS, 
+          HH_ROCK, HH_SWC, HH_PT, HH_BTS, 
           HH_SP_ARSA,HH_SP_PORC, HH_SP_NORTH)#, fill=TRUE)
 
 # check - should return TRUE
 nrow(HH) == nrow(HH_EVHOE)+nrow(HH_FRCGFS)+nrow(HH_IGFS)+
   nrow(HH_NSIBTS)+nrow(HH_ROCK)+nrow(HH_SWC)+
-  nrow(HH_NIGFS)+nrow(HH_PT)+nrow(HH_BTS)  +
+  nrow(HH_PT)+nrow(HH_BTS)  +
   nrow(HH_SP_PORC) + nrow(HH_SP_NORTH) + nrow(HH_SP_ARSA) 
 
-# convert HL data trames to data tables
+# convert HL data frames to data tables
 # cut to same years
 HL_EVHOE<-as.data.table(HL_EVHOE)
 
@@ -129,8 +126,8 @@ table(HL_ROCK$Year)
 HL_SWC<-as.data.table(HL_SWC)
 table(HL_SWC$Year)
 
-HL_NIGFS<-as.data.table(HL_NIGFS)
-  table(HL_NIGFS$Year)
+# HL_NIGFS<-as.data.table(HL_NIGFS)
+#   table(HL_NIGFS$Year)
 
 HL_BTS<-as.data.table(HL_BTS)
 
@@ -155,20 +152,20 @@ table(HH_SP_NORTH$Year)
 
 ### bind
 HL<-rbind(HL_EVHOE, HL_FRCGFS,HL_IGFS, HL_NSIBTS, 
-          HL_ROCK, HL_SWC,HL_NIGFS,HL_PT,HL_BTS,
+          HL_ROCK, HL_SWC,HL_PT,HL_BTS,
           HL_SP_ARSA,HL_SP_PORC, HL_SP_NORTH)#, fill=TRUE)
 
 # check - should return true
 nrow(HL) == nrow(HL_EVHOE)+nrow(HL_FRCGFS)+nrow(HL_IGFS)+
   nrow(HL_NSIBTS)+nrow(HL_ROCK)+nrow(HL_SWC)+  
-  nrow(HL_NIGFS)+nrow(HL_PT)+nrow(HL_BTS)+nrow(HL_SP_ARSA) + 
+  nrow(HL_PT)+nrow(HL_BTS)+nrow(HL_SP_ARSA) + 
   nrow(HL_SP_PORC) + nrow(HL_SP_NORTH)
 
 # Remove the intermediate files to free up space
 rm(HH_EVHOE,HH_FRCGFS,HH_IGFS,HH_NSIBTS,HH_ROCK,HH_SWC,
-   HH_NIGFS,HH_BTS,HH_PT,HH_SP_ARSA, HH_SP_NORTH, HH_SP_PORC,
+  HH_BTS,HH_PT,HH_SP_ARSA, HH_SP_NORTH, HH_SP_PORC,
    HL_EVHOE,HL_FRCGFS,HL_IGFS,HL_NSIBTS,HL_ROCK,HL_SWC,
-   HL_NIGFS,HL_BTS,HL_PT, HL_SP_NORTH, HL_SP_PORC, HL_SP_ARSA)
+   HL_BTS,HL_PT, HL_SP_NORTH, HL_SP_PORC, HL_SP_ARSA)
 
 
 # Add unique Hauls ID fields to each of the datasets to allow combination and changing

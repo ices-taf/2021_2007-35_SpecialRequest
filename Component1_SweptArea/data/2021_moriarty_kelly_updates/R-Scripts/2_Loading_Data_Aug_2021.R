@@ -10,7 +10,8 @@
 # The purpose of this script is to load the raw data into R from the various folders.
 # AUTHOR: Meadhbh Moriarty, 2016
 # REVIEWED BY: Nicola Walker (Cefas) Jonas Hentati Sundberg (SLU)
-# Editted for 2021 rerun by Ruth Kelly (AFBI) - R version 4.0.4 (2021-02-15) -- "Lost Library Book"
+# Edited for 2021 rerun by Ruth Kelly (AFBI) - R version 4.1.0 
+
 #############
 # Load data #
 #############
@@ -36,6 +37,8 @@ setSeed <- set.seed(627)
 # DATRAS files on a given date (08-09/06/2021)- scripts used in the download of these files
 # are given in script 0_get_datras_data.r
 
+# The National submissions for Northern Ireland are in the Raw Data / national submissions folder
+
 # For reproducibility the files are archived in the ICES sharepoint for the WK_SAE meeting of 2021, as they are 
 # too large to store on github.
 
@@ -58,7 +61,7 @@ rm(HH_ROCK1, HH_ROCK2)
 HH_PT<-read.csv("Raw_Data/DATRAS_08_06_2021/PT-IBTS/HH_data_PTIBTS_09_06_2021.csv")
 
 ## Irish Sea (NI)
-HH_NIGFS<-read.csv("Raw_Data/DATRAS_08_06_2021/NIGFS/HH_data_NIGFS_08_06_2021.csv")
+#HH_NIGFS<-read.csv("Raw_Data/DATRAS_08_06_2021/NIGFS/HH_data_NIGFS_08_06_2021.csv")
 
 ## Irish Ground Fish
 HH_IGFS<-read.csv("Raw_Data/DATRAS_08_06_2021/IE-IGFS/HH_data_IEIGFS_09_06_2021.csv")
@@ -140,8 +143,8 @@ NS_DEN_sp_1986<-read.csv("./Raw_Data/Corrections/DNK_IBTS1_1986_GOV.CSV", header
 #######################
 # Northern Irish Data #
 #######################
-# Northern Ireland early data not available on Datras
-NI_extra<-read.csv("./Raw_Data/National Submissions/Datras_MSFD_NI/Datras_MSFD1.csv", header=F)
+# Northern Ireland - updated to include all years from national database
+NI_extra<-read.csv("./Raw_Data/National Submissions/Datras_MSFD_NI/Datras_MSFD3.txt", header=F)
 
 
 ### Spain
@@ -159,6 +162,6 @@ HL_SP_PORC <- HL_SP_PORC[,-29]  ## remove scientific name col not present in oth
 
 HL_SP_PORC$Valid_Aphia <- HL_SP_PORC$ValidAphiaID  ## move and rename Aphia Id col to match SWC2
 
-HL_SP_PORC <- HL_SP_PORC[,-28] ## remove old apha ID column which is now moved. 
+HL_SP_PORC <- HL_SP_PORC[,-28] ## remove old aphia ID column which is now moved. 
 
 which(names(HL_SP_PORC) != names(HL_SWC)) ### now match and can be rbound

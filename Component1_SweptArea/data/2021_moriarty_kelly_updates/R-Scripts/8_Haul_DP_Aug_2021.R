@@ -28,7 +28,7 @@
 
 ## to run without running previous scripts load
 # setwd("C:/R/OSPAR_IBTS_dc")
-# hauls <- read.csv("Data_QA_Process_V4_2021/final_full_cleaned_hauls-end-haul-QA.csv")
+#hauls <- read.csv("Data_QA_Process_V5_2021/final_full_cleaned_hauls-end-haul-QA.csv")
 
 h<-hauls
 # check that the final list of hauls match in both groups
@@ -191,7 +191,7 @@ summary(h$Depth_m)
 summary(h$DoorSwptVol_CorF)
 
 h$SurveyDATRAS <- h$Survey
-
+summary(h)
 haul_dat<-subset(h, 
                  select=c(HaulID,Survey_Acronym,Ship,GearType,Gear, 
                           YearShot,MonthShot,DayShot,TimeShot, 
@@ -202,7 +202,7 @@ haul_dat<-subset(h,
                           SurveyDATRAS))
 
 for (cat in unique(haul_dat$Survey_Acronym)){
-  mypath <- file.path(paste("Data_QA_Process_V4_2021/Diagnostics/Haul Diagnostics", cat, ".jpeg", sep = ""))
+  mypath <- file.path(paste("Data_QA_Process_V5_2021/Diagnostics/Haul Diagnostics", cat, ".jpeg", sep = ""))
   jpeg(file=mypath)
   par(mfrow=c(2,3))
   d <- subset(haul_dat, Survey_Acronym == cat)
@@ -229,7 +229,10 @@ for (cat in unique(haul_dat$Survey_Acronym)){
 }
 summary(haul_dat)
 
-write.csv(haul_dat, "Data_QA_Process_V4_2021/Sampling_info_all_surveysV4_13-06-2021.csv", row.names = FALSE)
-write.csv(haul_dat, "Data_QA_Process_V4_2021/Sampling_info_all_surveysV4_13-06-2021.txt",  row.names = FALSE)
+# disable scientific notation (e.g. e-4 etc.. )
+options(scipen=999)
 
-write.csv(table(haul_dat$YearShot,haul_dat$SurveyDATRAS), "Data_QA_Process_V4_2021/Hauls_per_year_final_prod.csv")
+write.csv(haul_dat, "Data_QA_Process_V5_2021/Sampling_info_all_surveysV5_04-08-2021.csv", row.names = FALSE)
+write.csv(haul_dat, "Data_QA_Process_V5_2021/Sampling_info_all_surveysV5_04-08-2021.txt",  row.names = FALSE)
+write.csv(table(haul_dat$YearShot,haul_dat$SurveyDATRAS), "Data_QA_Process_V5_2021/Hauls_per_year_final_prod.csv")
+

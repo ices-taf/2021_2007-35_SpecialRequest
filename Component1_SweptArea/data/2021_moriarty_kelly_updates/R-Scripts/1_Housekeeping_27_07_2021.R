@@ -22,20 +22,27 @@ citation()
 
 # AUTHOR: Meadhbh Moriarty, 2016
 # REVIEWED BY: Nicola Walker (Cefas) Jonas Hentati Sundberg (SLU)
-# Edits by: Ruth Kelly (AFBI), 2021 for rerun - R version 4.0.4 (2021-02-15) -- "Lost Library Book"
+# Edits by: Ruth Kelly (AFBI), 2021 for rerun - R version 4.1.0 (2021-02-18) -- "Camp Pontanezen"
 
 
 # DATA SOURCE: DATRAS DOWNLOAD 22-02-2016/18-03-2016
 # Updated with more recent download Feb 2016
 # Second Download from DATRAS 09-05-2016
 # Third Download from DATRAS 29-09-2016 - 
-# Fourth download from DATRAS 08 and 09, June 2021. 
-
 # the THIRD version (29-09-2016) is the version used to derived the MSFD-QA-GFS-MA-DP
 # it is provided in the associated sharepoint file. "Raw-Data-29-09-2016"
 # Irish data updated on 28-06-2016 - duplicates from DATRAS removed
 # New surveys added September 2016
 # Spanish data re-checked and major revisions occured
+
+# Fourth version - conducted 14 of June. During WGSAE_DATRAS workshop. 
+# addition of most recent DATRAS data downloaded 08 and 09, June 2021. 
+
+# Fifth version - Changes NI dataset - entire time-series from the local database 
+# Updated files in 'Raw_Data/National Submissions/Datras_MSFD_NI/Datras_MSFD_2021.txt'
+# Created with the script 'Translate_MSFD_2021.r' in same folder 
+
+
 
 #################
 ## Housekeeping## 
@@ -43,11 +50,11 @@ citation()
 # Remove files from R Global Environment 
 rm(list = ls())
 ##Check proxy settings##
-Sys.getenv("http_proxy")
-## Fix proxy settings (; should be :)
-Sys.setenv(http_proxy="http://192.168.41.8:80")
+# Sys.getenv("http_proxy")
+# ## Fix proxy settings (; should be :)
+# Sys.setenv(http_proxy="http://192.168.41.8:80")
 ## this proxy is required for my system if no proxy is required use:
-# Sys.setenv(http_proxy="")
+#Sys.setenv(http_proxy="")
 ############
 # PACKAGES #
 ############
@@ -56,14 +63,14 @@ Sys.setenv(http_proxy="http://192.168.41.8:80")
 # ggplot2 is for pretty plots; data.table- for dealing with big data
 # DMwR - for lofactor(..): lme4- for mixed models
 # plyr - for summariesing data; marmap #for depth estimates
-list<-c("ggplot2", "data.table", "reshape2", "arm","car", "DMwR", "lme4", "plyr",
+list1<-c("ggplot2", "data.table", "reshape2", "arm","car",  "lme4", "plyr", #"DMwR",
         "marmap", "plotrix", "colorspace", "plot3D", "plot3D", "rgl","MuMIn",
         "mapplots", "class", "gridExtra", "ggmap")
-lapply(list, require, character.only=T)
-lapply(list, citation)
+lapply(list1, require, character.only=T)
+lapply(list1, citation)
 # The following packages are only required to download directly from DATRAS - so if you are
 # using the pre downloaded data there is no need to worry about these pkgs.
-# library(devtools) #- only required to download the rICES package from github
+#library(devtools) #- only required to download the rICES package from github
 #devtools::install_github("ices-dk/rICES")
 # library(rICES) #- only required if downloading directly from DATRAS
 # library(DATRAS) only required if downloading from DATRAS directly - see getDATRAS
@@ -129,4 +136,5 @@ rand_vect <- function(N, M, sd = 1, pos.only = TRUE) {
 #########################
 # Set Working Directory #
 #########################
-setwd("C:/R/OSPAR_IBTS_dc")
+setwd("P:/FAEB/AWP/48159_Fisheries independent demersal surveys/WGIBTS_analysis/2021/MSFD-QA-GFSM-A-DP/2021_moriarty_kelly_updates_v2")
+

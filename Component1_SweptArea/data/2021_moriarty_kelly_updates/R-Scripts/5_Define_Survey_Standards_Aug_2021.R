@@ -41,8 +41,8 @@
 # We show the processes undertaken to standardise/exclude hauls from the data set
 # Is the haul valid? yes retain, no remove
 
-invalidhauls<-subset(HH2, HaulVal=="I", ) # 1477 obs
-write.csv(invalidhauls, "Data_QA_Process_V4_2021/Diagnostics/Diagnostic_data/invalid_removed.csv")
+invalidhauls<-subset(HH2, HaulVal=="I", ) # 1465 obs
+write.csv(invalidhauls, "Data_QA_Process_V5_2021/Diagnostics/Diagnostic_data/invalid_removed.csv")
 
 # Select only valid hauls 
 # Select important columns
@@ -52,6 +52,9 @@ write.csv(invalidhauls, "Data_QA_Process_V4_2021/Diagnostics/Diagnostic_data/inv
 
 HH_save <- HH2
 
+HH_save$NewUniqueID2<-paste(HH_save$Survey,HH_save$Year,HH_save$Quarter,HH_save$Ship, 
+                            HH_save$HaulNo, HH_save$Gear, HH_save$StNo, HH_save$Country,
+                            sep="/")
 
 names(HH2)
 summary(as.factor(HH2$Month))
@@ -108,21 +111,34 @@ summary(as.factor(hauls$Gear))
 
 list<-c('GOV','NCT','ROT','BT8','BT4A','BT7', 'PORB','BAK') ### readded PORB and BAK used by Spain which were in previous product in 2016
 non_standard_gear<-subset(hauls, !Gear%in%list,) ### 65056 hauls
+table(non_standard_gear$Survey)
 hauls <- subset(hauls, Gear%in%list, )
 summary(hauls$Gear)
-write.csv(non_standard_gear, "Data_QA_Process_V4_2021/Diagnostics/Diagnostic_data/deleted_non_standard_gear_hauls.csv")
+write.csv(non_standard_gear, "Data_QA_Process_V5_2021/Diagnostics/Diagnostic_data/deleted_non_standard_gear_hauls.csv")
 # What is the standard tow duration
 # Delete hauls that are outside of the standard time 
+
+### EXCEPT FOR NIGFS hauls as all tows in database are concidered valid. 
 
 hauls$HaulDur<-(as.numeric(hauls$HaulDur))
 hist(hauls$HaulDur)
 summary(hauls$HaulDur)
-smallhauls<- subset(hauls, HaulDur<12 , )
-hauls<-subset(hauls, HaulDur>12 , )
-write.csv(smallhauls, "Data_QA_Process_V4_2021/Diagnostics/Diagnostic_data/deleted_too_short_hauls.csv")
-largehauls<- subset(hauls, HaulDur>67 ,)
-hauls<- subset(hauls, HaulDur<67 , )
-write.csv(largehauls, "Data_QA_Process_V4_2021/Diagnostics/Diagnostic_data/deleted_too_long_gear_hauls.csv")
+smallhauls<- hauls[hauls$HaulDur<12 & hauls$Survey !="NIGFS",]
+table(smallhauls$Survey)
+
+too_short <- which(hauls$HaulDur<12 & hauls$Survey !="NIGFS")
+
+hauls <- hauls[-too_short,]
+
+write.csv(smallhauls, "Data_QA_Process_V5_2021/Diagnostics/Diagnostic_data/deleted_too_short_hauls.csv")
+largehauls<- hauls[HaulDur>67 & hauls$Survey !="NIGFS",]
+table(largehauls$Survey)
+
+too_long <- which(hauls$HaulDur>67 & hauls$Survey !="NIGFS")
+hauls<- hauls[-too_long,]
+summary(hauls$HaulDur[hauls$Survey != "NIGFS"])
+
+write.csv(largehauls, "Data_QA_Process_V5_2021/Diagnostics/Diagnostic_data/deleted_too_long_gear_hauls.csv")
 summary(as.numeric(hauls$HaulDur))
 # Is the Survey Coordinated eg Q1 NS-IBTS
 levels(as.factor(hauls$Survey))
@@ -155,7 +171,7 @@ quaterscheck<-ddply(hauls, c("Survey", "Quarter"),
                     summarise,
                     count=length(StNo))
 
-### reducndant due to code above which removes Q2 from NS-IBTS trawls - rk
+### redundant due to code above which removes Q2 from NS-IBTS trawls - rk
 # hauls$QuarterCheck[hauls$Survey=="NS-IBTS" &
 #                      hauls$Quarter=="2"& hauls$Year>="1998"|hauls$Survey=="NS-IBTS" & hauls$Quarter=="4"
 #                    & hauls$Year>="1998"] <-"changed to 3"
@@ -188,6 +204,16 @@ hauls$QuarterCheck[hauls$Survey=="NIGFS" &
 hauls$Quarter[hauls$Survey=="NIGFS" &
                 hauls$Quarter=="3"] <-4
 
+
+### In 1997 some NIGFS in early April but survey started in March
+### In 2014 NIGFS happened in April but still concidered part
+### of Q1 survey. 
+hauls$QuarterCheck[hauls$Survey=="NIGFS" &
+                     hauls$Quarter=="2"] <-"changed to 1"
+hauls$Quarter[hauls$Survey=="NIGFS" &
+                hauls$Quarter=="2"] <-1
+
+
 hauls$QuarterCheck[hauls$Survey=="PT-IBTS" &
                      hauls$Quarter=="3"] <-"changed to 4"
 hauls$Quarter[hauls$Survey=="PT-IBTS" &
@@ -216,17 +242,20 @@ hauls$Quarter[hauls$Survey=="SP-NORTH" &
 
 ##
 
+
+# check quaters by survey
+cols<-rainbow(13)
 plot(hauls$Quarter, col=cols[as.factor(hauls$Survey)], pch=20)
+
 table(hauls$Quarter, hauls$Survey)
 
 table(hauls$QuarterCheck, hauls$Quarter)
 
-#
-# Standardizing survey area now seems to now happen at the end of the HH process instead - Script 8 - RK 2021
+
 #####################################
 #
 
-write.csv(hauls, "Data_QA_Process_V4_2021/Diagnostics/Diagnostic_data/Working_HH_file_12-06-2021.csv")
+write.csv(hauls, "Data_QA_Process_V5_2021/Diagnostics/Diagnostic_data/Working_HH_file_27_072021.csv")
 ## Check Unique IDS are unique
 check<-unique(hauls$NewUniqueID2)
 findduplicates<-hauls[duplicated(hauls$NewUniqueID2),]
@@ -260,12 +289,19 @@ nrow(hauls[duplicated(hauls$New_UniqueID2),]) ## should return 0
 checkhl<-unique(HL2$NewUniqueID2)
 check <- unique(hauls$NewUniqueID2)
 
-length(setdiff(checkhl, check)) ## expected records attached to hauls no longer in HH
+length(setdiff(checkhl, check)) ##  hauls no longer in HH - expected
 length(setdiff(check, checkhl)) ## odd ids in the HH not in the HL 
 
 HHcheck <- hauls[hauls$NewUniqueID2 %in% setdiff(check, checkhl),]
+HHcheck2 <- HL2[HL2$NewUniqueID2 %in% setdiff( checkhl, check),]
 
 table(HHcheck$Survey, HHcheck$Year)
+table(HHcheck2$Survey, HHcheck2$Year)
+HHcheck_NI <- HHcheck[HHcheck$Survey == "NIGFS",]
+HHcheck_NI2 <- HHcheck2[HHcheck2$Survey == "NIGFS",]
+unique(HHcheck_NI$ NewUniqueID2) ## okay - "NIGFS/2001/4/74LG/36/ROT/94/NI" - this really does have no haul data.. 
+unique(HHcheck_NI2$ NewUniqueID2) ### these are hauls of more than 67 minutes duration. 
+
 
 #### these are mainly in the Spanish data, SP-NORTH and SP-PORC 
 # perhaps because Spain aren't currently submitting all their species records. 
@@ -305,7 +341,7 @@ check<-unique(hauls$NewUniqueID2)
 checkhl1<-unique(HL3$NewUniqueID2)
 setdiff(checkhl1, check)
 setdiff(check, checkhl1)
-# hopefully this solves some problems of the not so unique ids :)
+# 
 
 
 # difference in ValidAphiaID
@@ -315,8 +351,8 @@ names(HL3)
 #HL3$ValidAphiaID[is.na(HL3$ValidAphiaID)]<-127459
 ValidAphiaIDHL2<-unique(HL2$ValidAphiaID)
 setdiff(ValidAphiaIDHL, ValidAphiaIDHL2)
-write.csv(ValidAphiaIDHL2, "Data_QA_Process_V4_2021/Diagnostics/Diagnostic_data/Standard_Survey_Species_list.csv")
-write.csv(ValidAphiaIDHL, "Data_QA_Process_V4_2021/Diagnostics/Diagnostic_data/Full_Species_list.csv")
+write.csv(ValidAphiaIDHL2, "Data_QA_Process_V5_2021/Diagnostics/Diagnostic_data/Standard_Survey_Species_list.csv")
+write.csv(ValidAphiaIDHL, "Data_QA_Process_V5_2021/Diagnostics/Diagnostic_data/Full_Species_list.csv")
 
 summary(as.numeric(HL3$ValidAphiaID))
 
@@ -339,17 +375,17 @@ hauls$WingSpread[which(hauls$WingSpread == -9)]<- NA
 hauls$GroundSpeed[which(hauls$GroundSpeed  == -9)]<- NA 
 hauls$SpeedWater[which(hauls$GroundSpeed  == -9)]<- NA  
 
-write.csv(hauls, "Data_QA_Process_V4_2021/Diagnostics/Diagnostic_data/Working_HH_file.csv")
+write.csv(hauls, "Data_QA_Process_V5_2021/Diagnostics/Diagnostic_data/Working_HH_file.csv")
 
 head(HL3)
 
-write.csv(HL3, "Data_QA_Process_V4_2021/Diagnostics/Diagnostic_data/Working_HL_file.csv")
+write.csv(HL3, "Data_QA_Process_V5_2021/Diagnostics/Diagnostic_data/Working_HL_file.csv")
 
 ## tidy - RK -2021
-old_files <- c("hauls_sub", "haulsx", "haulsx2", "HH_BTS_DE", "HH_save", 
-               "HH1", "HH", "HLcheck", "invalidhauls", "largehauls",
+old_files <- c("hauls_sub", "HH_BTS_DE", "HH_save", 
+               "HH1", "HH", "invalidhauls", "largehauls",
                "HL2", "landlocked", "non_standard_gear", "pre1983",
-               "quater2or4", "quaterscheck" ,"remove_stations","SOL_ship" ,
+                "quaterscheck" ,"remove_stations","SOL_ship" ,
                "SP_north", "check", "checkhl","checkhl1", "x1", "x2", "x3", "x4",
                "HH2", "add_SP", "bad_data", "belgium", "Car_ship",
                "delete_ship", "den", "find", "findduplicates", "funnysweep",
