@@ -34,6 +34,20 @@ The final data products, SweptAreaAssessmentOutput and SensitiveSpeciesAbundance
 
 https://datras.ices.dk/Data_products/Download/Download_Data_public.aspx
 
+<br>
+The scripts in this repo have been created and edited by two working groups:
+
+* WKSAE-DATRAS, Workshop on the production of swept area estimates for all hauls in DATRAS for biodiversity assessments.
+<br>
+The report of this workshop can be found here:
+https://www.ices.dk/sites/pub/Publication%20Reports/Expert%20Group%20Report/EOSG/2021/WKSAE-DATRAS_2021.pdf
+<br>
+and the main repo for it is here:
+https://github.com/ices-tools-dev/MSFD-QA-GFSM-A-DP
+
+* WKABSENS, Workshop on the production of abundance estimates for sensitive species.Its report can be found here:
+https://www.ices.dk/sites/pub/Publication%20Reports/Expert%20Group%20Report/EOSG/2021/WKABSENS_2021.pdf
+
 
 <br>
 Any comments or issues related to the present repository contents should be directed to advice@ices.dk and/or to datrasadministration@ices.dk.

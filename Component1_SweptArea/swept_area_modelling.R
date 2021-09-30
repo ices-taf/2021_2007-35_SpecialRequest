@@ -82,7 +82,7 @@ table(flex_data$HaulVal)
 flex_data <- subset(flex_data, HaulVal == "V")
 
 # load OSPARData
-ospar_data <- as.data.frame(read_csv("Component1_SweptArea/data/2021_moriarty_kelly_updates/Data_QA_Process_V4_2021/final_full_cleaned_hauls-end-haul-QA.csv", 
+ospar_data <- as.data.frame(read_csv("Component1_SweptArea/data/2021_moriarty_kelly_updates/Data_QA_Process_V4_2021/final_full_cleaned_hauls-end-haul-QA_Oct_2021_rerun.csv", 
                                      col_types = cols(X1 = col_skip())))
 
 ospar_data <- ospar_data[, -1]
@@ -136,25 +136,23 @@ ospar_data <- ospar_data[,c("Survey","Ship","Country","Year","Quarter","Depth","
                             "SweepLngt","Warplngt","DoorSpread","WingSpread","Distance","GroundSpeed","HaulDur",
                             "SweptAreaDSKM2","SweptAreaWSKM2","Gear","ID")]
 
-#AV what is this for?
-# ospar_data$SweptAreaDSKM2 <- NA  # not sure if the conversion on line 99 is correct!
+ospar_data$SweptAreaDSKM2 <- NA  # not sure if the conversion on line 99 is correct!
 
 
 # remove some observations
 #AV: I would not do all this, as we might use one from flexfile and one from ospar
 # flex_data <- subset(flex_data, SweptAreaWSKM2 > 0)
 # flex_data <- subset(flex_data, SweptAreaDSKM2 > 0)
+flex_data$SweptAreaDSKM2[flex_data$SweptAreaDSKM2<= 0] <- NA  
+flex_data$SweptAreaWSKM2[flex_data$SweptAreaWSKM2<= 0] <- NA  
 # flex_data <- subset(flex_data, DoorSpread > 0)
 # flex_data <- subset(flex_data, WingSpread > 0)
 
 # AV: In ospar data both values always appear
 ospar_data <- subset(ospar_data, SweptAreaWSKM2 > 0)
-ospar_data <- subset(ospar_data, SweptAreaDSKM2 > 0)
+# ospar_data <- subset(ospar_data, SweptAreaDSKM2 > 0)
 # ospar_data <- subset(ospar_data, DoorSpread > 0)
 # ospar_data <- subset(ospar_data, WingSpread > 0)
-
-# Could there be added a flag, one for SweptAreaWSKM2 and other for SweptAreaDSKM2
-# to identify easily the source of that value in the download?
 
 flex_data$DSFlag <- "Flexfile"
 ospar_data$DSFlag <- "Ospar"
@@ -164,14 +162,15 @@ ospar_data$WSFlag <- "Ospar"
 
 # put data together
 all_data  <- rbind(flex_data, ospar_data)
+# all_data2 <- rbind(ospar_data, flex_data)
 table(all_data$DSFlag)
-table(all_data$WSFlag)
 
 # mean swept area by ID (in case both OSPAR and FlexFile is available)
 # swept_area_WS <- aggregate(SweptAreaWSKM2 ~ ID, FUN = "mean", data = all_data)
 # swept_area_DS <- aggregate(SweptAreaDSKM2 ~ ID, FUN = "mean", data = all_data)
 
 # remove duplicates (use FlexFile in case it is available)
+# dupl <- all_data2[duplicated(all_data2$ID),]
 all_data <- all_data[!duplicated(all_data$ID),]
 table(all_data$DSFlag)
 
@@ -705,6 +704,9 @@ hh$SweptAreaBWKM2 <- NA # based on beam size
 # hh$SweptAreaWSKM2 <- swept_area_WS$SweptAreaWSKM2[match(hh$ID,swept_area_WS$ID)]
 # hh$SweptAreaDSKM2 <- swept_area_DS$SweptAreaDSKM2[match(hh$ID,swept_area_DS$ID)]
 
+# AV: this flagging is not working correctly, will need to be reviewed and 
+# added in the next update of the product.
+
 hh$FlagDS <- NA
 hh$FlagWS <- NA
 
@@ -713,13 +715,21 @@ hh$SweptAreaWSKM2 <- flex_data$SweptAreaWSKM2[match(hh$ID,flex_data$ID)]
 hh$SweptAreaDSKM2 <- flex_data$SweptAreaDSKM2[match(hh$ID,flex_data$ID)]
 
 hh$FlagDS[match(hh$ID,flex_data$ID)] <- "FlexFile" 
+hh$FlagWS[match(hh$ID,flex_data$ID)] <- "FlexFile" 
+hh$FlagDS[is.na(hh$SweptAreaDSKM2)] <- NA
+hh$FlagWS[is.na(hh$SweptAreaWSKM2)] <- NA
+table(hh$FlagDS)
 
 # add estimates from OSPAR data
 hh$SweptAreaWSKM2[is.na(hh$SweptAreaWSKM2)] <- ospar_data$SweptAreaWSKM2[match(hh$ID[is.na(hh$SweptAreaWSKM2)],ospar_data$ID)]
 hh$SweptAreaDSKM2[is.na(hh$SweptAreaDSKM2)] <- ospar_data$SweptAreaDSKM2[match(hh$ID[is.na(hh$SweptAreaDSKM2)],ospar_data$ID)]
 
-#HERE, check point, write.csv(hh, file = "hh_test28sept.csv")
-# still ok
+hh$FlagDS[is.na(hh$SweptAreaDSKM2)][match(hh$ID[is.na(hh$SweptAreaDSKM2)],ospar_data$ID)] <- "Ospar" 
+hh$FlagWS[is.na(hh$SweptAreaWSKM2)][match(hh$ID[is.na(hh$SweptAreaWSKM2)],ospar_data$ID)] <- "Ospar" 
+hh$FlagDS[is.na(hh$SweptAreaDSKM2)] <- NA
+hh$FlagWS[is.na(hh$SweptAreaWSKM2)] <- NA
+
+table(hh$FlagWS)
 
 table(hh$Year, is.na(hh$SweptAreaDSKM2))
 table(hh$Year, is.na(hh$SweptAreaDSKM2))
@@ -727,10 +737,6 @@ table(hh$Year, is.na(hh$SweptAreaDSKM2))
 hh$SweptAreaWSKM2[is.na(hh$SweptAreaWSKM2)] <- hh$WingSpread[is.na(hh$SweptAreaWSKM2)] * hh$Distance[is.na(hh$SweptAreaWSKM2)]/1000000 # in km²
 hh$SweptAreaDSKM2[is.na(hh$SweptAreaDSKM2)] <- hh$DoorSpread[is.na(hh$SweptAreaDSKM2)] * hh$Distance[is.na(hh$SweptAreaDSKM2)]/1000000
 hh$SweptAreaBWKM2                           <- hh$BeamWidth * hh$Distance/1000000
-
-#HERE, check point, write.csv(hh, file = "hh_test28sept.csv")
-# still ok
-
 
 # some gear levels were missing in the data, so need an altnerative prediction of door/wingspread
 # fill missing data by Survey
@@ -1076,11 +1082,6 @@ for(SURVEY in SURVEYS){
 # calculate the swept areas
 hh$SweptAreaWSKM2[is.na(hh$SweptAreaWSKM2)] <- hh$WingSpread[is.na(hh$SweptAreaWSKM2)] * hh$Distance[is.na(hh$SweptAreaWSKM2)]/1000000
 hh$SweptAreaDSKM2[is.na(hh$SweptAreaDSKM2)] <- hh$DoorSpread[is.na(hh$SweptAreaDSKM2)] * hh$Distance[is.na(hh$SweptAreaDSKM2)]/1000000
-
-
-#HERE, check point, write.csv(hh, file = "hh_test28sept.csv")
-# still ok
-
 
 # check for missing observations
 table(hh$Year,(is.na(hh$SweptAreaWSKM2) | is.na(hh$SweptAreaDSKM2)) & is.na(hh$SweptAreaBWKM2))
@@ -1443,8 +1444,6 @@ table((is.na(hh$SweptAreaWSKM2) | is.na(hh$SweptAreaDSKM2)) & is.na(hh$SweptArea
 table(hh$Year,(is.na(hh$SweptAreaWSKM2) | is.na(hh$SweptAreaDSKM2)) & is.na(hh$SweptAreaBWKM2))
 table(hh$Survey,(is.na(hh$SweptAreaWSKM2) | is.na(hh$SweptAreaDSKM2)) & is.na(hh$SweptAreaBWKM2))
 
-# CHECK POINT write.csv(hh, file = "hh_test28sept.csv")
-# still looks fine
 
 # some simple plots
 boxplot(SweptAreaWSKM2 ~ Survey, hh)
@@ -1458,7 +1457,7 @@ hh$id          <- NULL
 
 # save data
 # save(hh, file = file.path("output","hh_swept_area.RData"))
-write.csv(hh, file = "hh_test29sept.csv")
+write.csv(hh, file = "SweptAreaAssessmentOutput20213009.csv")
 # range(hh$SweptAreaBWKM2, na.rm = T)
 # range(hh$SweptAreaDSKM2, na.rm = T)
 # range(hh$SweptAreaWSKM2, na.rm = T)
