@@ -17,7 +17,7 @@ The request is divided in two main parts:
 The complete ICES advice document answering the request can be found in:
 
 * ICES.2021. OSPAR request to generate swept area and abundance index outputs for all otter and beam trawl surveys in the Northeast Atlantic and regional seas based on DATRAS data as input to OSPAR common indicator. ICES Advice. sr.2007.35.
-https://doi.org/10.17895/ices.advice.8281
+https://doi.org/10.17895/ices.advice.8300
 <br>
 
 Input data required to run the scripts are available in the ICES library in the following Data outputs, :
@@ -44,6 +44,7 @@ https://www.ices.dk/sites/pub/Publication%20Reports/Expert%20Group%20Report/EOSG
 <br>
 and the main repo for it is here:
 https://github.com/ices-tools-dev/MSFD-QA-GFSM-A-DP
+<br>
 
 * WKABSENS, Workshop on the production of abundance estimates for sensitive species.Its report can be found here:
 https://www.ices.dk/sites/pub/Publication%20Reports/Expert%20Group%20Report/EOSG/2021/WKABSENS_2021.pdf
